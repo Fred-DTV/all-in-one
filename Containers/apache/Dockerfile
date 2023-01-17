@@ -8,7 +8,14 @@ RUN mkdir -p /mnt/data; \
 
 VOLUME /mnt/data
 
-RUN apk add --no-cache bash tzdata coreutils supervisor wget ca-certificates openssl netcat-openbsd
+RUN apk add --no-cache bash \
+		       wget \
+                       tzdata \
+		       coreutils \
+		       supervisor \
+		       ca-certificates \
+		       openssl \
+		       netcat-openbsd
 
 COPY --from=caddy /usr/bin/caddy /usr/bin/
 RUN chmod +x /usr/bin/caddy
