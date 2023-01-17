@@ -20,9 +20,16 @@ RUN mkdir -p /var/www/docker-aio;
 WORKDIR /var/www/docker-aio
 
 RUN set -ex; \
-    apk add --no-cache ca-certificates wget tzdata \ 
-		       bash apache2 supervisor openssl netcat-openbsd \
-		       autoconf build-base; \
+    apk add --no-cache ca-certificates \
+                       wget \
+		       tzdata \ 
+		       bash \
+		       apache2 \
+		       supervisor \
+		       openssl \
+		       netcat-openbsd \
+		       autoconf \
+		       build-base; \
     pecl install APCu-5.1.22; \
     docker-php-ext-enable apcu; \
     apk del --no-cache autoconf build-base
