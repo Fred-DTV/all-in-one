@@ -56,7 +56,7 @@ Add this as a new Apache site config:
     Protocols h2 h2c http/1.1
     
     # Solves slow upload speeds caused by http2
-    H2WindowSize 5242880
+    H2WindowSize 1048576
 
     # SSL
     SSLEngine on
@@ -328,19 +328,13 @@ Apart from that, there is this: [manual-install](https://github.com/nextcloud/al
 
 See these screenshots for a working config:
 
-![grafik](https://user-images.githubusercontent.com/75573284/213889707-b7841ca0-3ea7-4321-acf6-50e1c1649442.png)
+![image](https://user-images.githubusercontent.com/75573284/169556183-2999a733-de42-4008-af09-d4151719a474.png)
 
-![grafik](https://user-images.githubusercontent.com/75573284/213889724-1ab32264-3e0c-4d83-b067-9fe9d1672fb2.png)
+![image](https://user-images.githubusercontent.com/75573284/169555356-71f32be5-99b5-43ea-8aa7-632c8ef8fad3.png)
 
-![grafik](https://user-images.githubusercontent.com/75573284/213889797-42642302-b079-4378-a4a6-079f4f67058c.png)
+![image](https://user-images.githubusercontent.com/75573284/169557664-52db8713-f0ef-42ac-a161-de40280232a3.png)
 
-![grafik](https://user-images.githubusercontent.com/75573284/213889746-87dbe8c5-4d1f-492f-b251-bbf82f1510d0.png)
-
-```
-client_body_buffer_size 512k;
-proxy_read_timeout 86400s;
-client_max_body_size 0;
-```
+![image](https://user-images.githubusercontent.com/75573284/169555441-dd9a42f5-aea5-4082-8e26-7adcfa4e6cfa.png)
 
 Of course you need to modify `<your-nc-domain>` to the domain on which you want to run Nextcloud. Also change `<you>@<your-mail-provider-domain>` to a mail address of yours. Also make sure to adjust the port 11000 to match the chosen APACHE_PORT. **Please note:** The above configuration will only work if your reverse proxy is running directly on the host that is running the docker daemon. If the reverse proxy is running in a docker container, you can use the `--network host` option (or `network_mode: host` for docker-compose) when starting the reverse proxy container in order to connect the reverse proxy container to the host network. If that is not an option for you, you can alternatively instead of `localhost` use the ip-address that is displayed after running the following command on the host OS: `ip a | grep "scope global" | head -1 | awk '{print $2}' | sed 's|/.*||'` (the command only works on Linux)
 
@@ -354,16 +348,31 @@ Of course you need to modify `<your-nc-domain>` to the domain on which you want 
 
 <summary>click here to expand</summary>
 
-**Disclaimer:** It might be possible that the config below is not working 100% correctly, yet. Improvements to it are very welcome!
-
-See these screenshots for a working config:
-
-![image](https://user-images.githubusercontent.com/89748315/192525606-48cab54b-866e-4964-90a8-15e71bd362fb.png)
-
+    
+![Screenshot 2023-01-20 at 11 54 41](https://user-images.githubusercontent.com/70434961/213679766-96c44fd8-12e7-4f81-9227-48476c58aaef.jpg)
+![Screenshot 2023-01-20 at 11 55 06](https://user-images.githubusercontent.com/70434961/213680608-0e11c6dc-0fa2-4961-9f55-4f7f8c977e69.jpg)
 ![image](https://user-images.githubusercontent.com/70434961/213193789-fa936edc-e307-4e6a-9a53-ae26d1bf2f42.jpg)
 
 Of course you need to modify `<your-nc-domain>` to the domain on which you want to run Nextcloud. Also make sure to adjust the port 11000 to match the chosen APACHE_PORT. **Please note:** The above configuration will only work if your reverse proxy is running directly on the host that is running the docker daemon. If the reverse proxy is running in a docker container, you can use the `--network host` option (or `network_mode: host` for docker-compose) when starting the reverse proxy container in order to connect the reverse proxy container to the host network. If that is not an option for you, you can alternatively instead of `localhost` use the ip-address that is displayed after running the following command on the host OS: `ip a | grep "scope global" | head -1 | awk '{print $2}' | sed 's|/.*||'` (the command only works on Linux)
 
+The run script with reverse proxy which points to `localhost` at port 11000 with **HTTP** internally
+```
+sudo docker run \
+--sig-proxy=false \
+--name nextcloud-aio-mastercontainer \
+--restart always \
+--publish 8080:8080 \
+-e APACHE_PORT=11000 \
+-e APACHE_IP_BINDING=127.0.0.1 \
+--volume nextcloud_aio_mastercontainer:/mnt/docker-aio-config \
+--volume /volume1/docker/docker.sock:/var/run/docker.sock:ro \
+-e NEXTCLOUD_DATADIR="/volume1/docker/nextcloud/data" \
+-e DOCKER_SOCKET_PATH="/volume1/docker/docker.sock" \
+nextcloud/all-in-one:latest
+```
+
+**Disclaimer:** It might be possible that the config below is not working 100% correctly, yet. Improvements to it are very welcome!
+    
 </details>
 
 ### Traefik 2
@@ -502,8 +511,6 @@ docker run ^
 --volume //var/run/docker.sock:/var/run/docker.sock:ro ^
 nextcloud/all-in-one:latest
 ```
-
-Also, you may be interested in adjusting Nextcloud's Datadir to store the files on the host system. See [this documentation](https://github.com/nextcloud/all-in-one#how-to-change-the-default-location-of-nextclouds-datadir) on how to do it.
 
 </details>
 
